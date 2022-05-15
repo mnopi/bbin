@@ -204,3 +204,8 @@
 !/.sublime
 /.sublime/homebrew.sublime-workspace
 !/.vscode
+
+
+### START: main
+!/.idea
+### END: main

@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="master" pattern="file[brew]:.gitignore&amp;&amp;!file[brew]:.gitignore" />
+</component>

@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="stable" pattern="file[brew]:rubocop-schema.json||file[brew]:Makefile||file[brew]:Gemfile.lock||file[brew]:install||file[brew]:Gemfile||file[brew]:.env||file[brew]:Brew.app//*||file[brew]:.idea//*||file[brew]:.bundle1//*||file[brew]:rubocop.json||file[brew]:test_require.rb||file[brew]:init.rb||file[brew]:.bundle1//*||file[brew]:.irbrc||file[brew]:.pryrc||file[brew]:init||file[brew]:.env.sh||file[brew]:.irb_history||file[brew]:config||file[brew]:.standard.yml||file[brew]:.rubocop.yml||file[brew]:bundle//*||file[brew]:Library/Homebrew/init.rb" />
+</component>
