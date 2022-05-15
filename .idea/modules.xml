@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/brew.iml" filepath="$PROJECT_DIR$/.idea/brew.iml" />
+      <module fileurl="file://$PROJECT_DIR$/fast/fast.iml" filepath="$PROJECT_DIR$/fast/fast.iml" />
+      <module fileurl="file://$PROJECT_DIR$/init/init/init.iml" filepath="$PROJECT_DIR$/init/init/init.iml" />
     </modules>
   </component>
 </project>
