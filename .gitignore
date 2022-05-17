@@ -207,8 +207,10 @@
 
 
 ### START: main
+!/.bundle
 !/.idea
 !/.rubocop.yml
+!/console
 !/Gemfile
 !/install
 ### END: main
