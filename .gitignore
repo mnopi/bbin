@@ -208,5 +208,7 @@
 
 ### START: main
 !/.idea
+!/.rubocop.yml
+!/Gemfile
 !/install
 ### END: main
