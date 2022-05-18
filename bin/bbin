@@ -1,0 +1,157 @@
+#!/bin/sh
+
+set -eu
+{
+OWNER="j5pu"
+REPO="bbin"
+HOMEBREW_BREW_GIT_REMOTE="https://github.com/${OWNER}/${REPO}"
+UNAME="$(uname)"
+MACHINE="$(uname -m)"
+
+#######################################
+# check if current working directory exists and exit if not
+# Globals
+#   CWD
+# Arguments:
+#   None
+#######################################
+cwd() {
+  test -d "$(pwd -P)" || die "Current working directory does not exist: $(pwd -P)"
+  CWD="$(pwd -P)"
+}
+
+#######################################
+# check if dependencies are met for Homebrew
+# Arguments:
+#   None
+#######################################
+dependencies_met() {
+  command -v git >/dev/null 2>&1
+  command -v curl >/dev/null 2>&1
+  command -v jq >/dev/null 2>&1
+}
+
+#######################################
+# die with return or exit
+# Globals:
+#   RETURN
+# Arguments:
+#   None
+#######################################
+die() {
+  rc=$?
+  >&2 printf '%b\n' "\033[1;31m✘\033[0m ${REPO}: $*"
+  "${RETURN:-exit}" $rc
+}
+
+#######################################
+# show usage
+# Arguments:
+#   1
+#######################################
+help() {
+  rc=$?
+  [ ! "${1-}" ] || { RETURN="return" die "$1" ; echo; rc=1; }
+  >&2 cat <<EOF
+usage: ${REPO} [command] [option]
+   or: ${REPO} prefix
+   or: ${REPO} prefix  --development
+
+system or development ${REPO} repository installer
+
+System install is done by default unless "--development" is specified, /etc/profile is updated with \$HOMEBREW_PREFIX.
+
+Homebrew is not updated if requirements are not met on the system, unless specified with "--with-homebrew".
+
+Homebrew default installation directories are used when no stdin (i.e. <cat|curl> [https://.../]install | sh -s ),
+unless "--development" is used (cwd), otherwise downloaded path is used.
+
+"--passwd" is ignored when "--development" is used.
+
+Options:
+   --development            installs as development repository, .env is created with variables in Globals section
+   --password=<password>    sudo password to update sudoers and \$PASSWORD in etc/profile.d/password.sh
+   --with-homebrew          install requirements for homebrew
+
+Commands:
+   prefix                   show prefix (top path of the repository or installation directory) and exit
+   -h, --help, help         display this help and exit.
+
+Globals:
+   HOMEBREW_DEVELOPER       prefix to install generated or temporary files, i.e.: casks app dir
+   HOMEBREW_PREFIX          top path of the repository
+
+Exit Code:
+   1   installation in a temp directory, under a git repository or cwd does not exist
+
+Examples:
+   $ git clone --depth 1
+EOF
+
+  exit $rc
+}
+
+prefix() {
+
+  if [ "${0##*/}" = "${REPO}" ]; then
+    # can be executed in temp if not development.
+    cd "$(dirname "$0")/.."
+    HOMEBREW_PREFIX="$(pwd -P)"; export HOMEBREW_PREFIX
+
+  else
+    echo clone
+  fi
+  if $development; then
+    :
+  else
+    :
+  fi
+  cwd
+  echo "${HOMEBREW_PREFIX}" | grep -qvE "^/private/tmp|^/tmp" \
+    || die "${HOMEBREW_PREFIX}: installation can not be done in temp directory"
+  ! $prefix || { echo "${HOMEBREW_PREFIX}"; exit; }
+}
+
+#######################################
+# absolute physical path
+# Arguments:
+#   1   path
+#######################################
+real() { echo "$(cd "$(dirname "$1")"; pwd -P)/$(basename "$1")"; }
+
+main() {
+  development=false; prefix=false; with_homebrew=false
+  check if cwd is in git repository
+  for arg; do
+    case "${arg}" in
+      -h|--help|help) help; return ;;
+      --development) development=true ;;
+      --password=*) password="${arg#*=}" ;;
+      --with-homebrew) with_homebrew=true ;;
+      prefix) prefix=true ;;
+      *) help "${arg}: invalid command/option" ;;
+    esac
+  done
+
+  prefix
+
+}
+
+main "$@"
+}
+
+
+
+! test -f .env || . .env
+
+./bin/brew update --force --quiet
+chmod -R go-w ./bin/brew/share/zsh 2>/dev/null
+git pull --quiet --tags
+git stash list
+
+#brew tap "${BREW_OWNER}/tap"
+sudo chmod -R g+w /Library/Developer /Library/Java /Library/Perl /Library/Python /Library/Ruby
+sudo chown -R :admin /Library/Developer /Library/Java /Library/Perl /Library/Python /Library/Ruby
+
+# TODO: PROBAR CON EL HOMEBREW_CORE TAMBIEN CLONE. y el ignore ! y con la veriable exportada.
+

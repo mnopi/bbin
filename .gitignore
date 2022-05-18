@@ -211,7 +211,11 @@
 !/.idea
 !/.rubocop.yml
 !/console
+!/bin/bats
+!/bin/bats.sh
+!/bin/bbin
+!/etc/profile
 !/etc/profile.d/00-constants.sh
+!/tests
 !/Gemfile
-!/install
 ### END: main
