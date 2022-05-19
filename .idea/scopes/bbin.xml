@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="bbin" pattern="file[bbin]:.bundle//*||file[bbin]:.idea//*||file[bbin]:libexec//*||file[bbin]:tests/helpers//*||file:etc/profile||file:etc/profile.d/00-constants.sh||file:sbin/bats||file:.rubocop.yml||file:console||file:Gemfile||file[bbin]:Library/Homebrew/lib//*" />
+</component>

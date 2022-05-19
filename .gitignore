@@ -207,23 +207,25 @@
 /.sublime/homebrew.sublime-workspace
 !/.vscode
 
-
 ### START
+## /
 !/.bundle
 !/.idea
-## bin
+## /bin
 !/bin/bbin
-!/bin/utils.bash
-!/bin/utils.sh
-## etc
-!/etc/profile
+## /etc
 !/etc/profile.d/00-constants.sh
-## sbin
+!/etc/profile
+## /libexec
+!/libexec/bats.bash
+!/libexec/paths.sh
+!/libexec/utils.bash
+!/libexec/utils.sh
+## /sbin
 !/sbin/bats
-!/sbin/bats.sh
-## tests
-!/tests
-##
+## /tests
+!/tests/helpers/helper.bash
+## /
 !/.rubocop.yml
 !/console
 !/Gemfile
