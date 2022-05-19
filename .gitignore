@@ -206,16 +206,23 @@
 !/.vscode
 
 
-### START: main
+### START
 !/.bundle
 !/.idea
-!/.rubocop.yml
-!/console
-!/bin/bats
-!/bin/bats.sh
+## bin
 !/bin/bbin
+!/bin/utils.bash
+!/bin/utils.sh
+## etc
 !/etc/profile
 !/etc/profile.d/00-constants.sh
+## sbin
+!/sbin/bats
+!/sbin/bats.sh
+## tests
 !/tests
+##
+!/.rubocop.yml
+!/console
 !/Gemfile
-### END: main
+### END
