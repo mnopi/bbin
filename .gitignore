@@ -211,6 +211,8 @@
 ## /
 !/.bundle
 !/.idea
+## /Bbin.app
+!/Bbin.app
 ## /bin
 !/bin/bbin
 ## /etc

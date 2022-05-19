@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2155,SC2046
 
+. paths.sh
+# TODO: lo helps quitárselos como están ya que separo el bats del bats.sh
 # <html><h2>Bats Description Array</h2>
 # <p><strong><code>$BATS_ARRAY</code></strong> created by bats::array() with $BATS_TEST_DESCRIPTION.</p>
 # </html>
@@ -22,6 +24,16 @@ export BATS_FUNCTIONS=()
 # Gather the output of failing *and* passing tests as files in directory (variable set by: bats).
 #
 export BATS_GATHER
+
+# <html><h2>Saved $INFOPATH on First Suite Test Start</h2>
+# <p><strong><code>$BATS_INFOPATH</code></strong></p>
+# </html>
+export BATS_INFOPATH="${INFOPATH}"
+
+# <html><h2>Saved $MANPATH on First Suite Test Start</h2>
+# <p><strong><code>$BATS_MANPATH</code></strong></p>
+# </html>
+export BATS_MANPATH="${MANPATH}"
 
 # Directory to write report files (variable set by: bats).
 #
@@ -68,6 +80,10 @@ export BATS_TOP="$(git rev-parse --show-toplevel 2>/dev/null || true)"
 # </html>
 export BATS_BASENAME="${BATS_TOP##*/}"
 
+export INFOPATH
+
+export MANPATH
+
 #######################################
 # Restores $PATH to $BATS_PATH and sources .envrc.
 # Globals:
@@ -78,7 +94,10 @@ export BATS_BASENAME="${BATS_TOP##*/}"
 bats::env() {
   bats::cd
   PATH="${BATS_PATH}"
-  # TODO: dedup
+  MANPATH="${BATS_MANPATH}"
+  INFOPATH="${BATS_INFOPATH}"
+  path_add_exist_all "${BATS_TOP}"
+  # TODO: envfile
   #  . "$(dirname "${BASH_SOURCE[0]}")/envfile.sh"
   #  envfile
 }
