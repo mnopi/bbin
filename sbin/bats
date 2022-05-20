@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2155,SC2046
 
-# TODO: patch del formatter, envrc
+# TODO: envrc
 
 . paths.sh
 
@@ -422,7 +422,6 @@ EOF
   exit $rc
 }
 
-
 #######################################
 # ok message
 # Arguments:
@@ -447,7 +446,6 @@ _unsets() {
 #   None
 #######################################
 _main() {
-  # TODO: ver que funcionan tests parciales
   local sourced=false
   [ "${BASH_SOURCE##*/}" = "${0##*/}" ] || sourced=true
 
@@ -501,7 +499,6 @@ _main() {
         shift
         ;;
       -F | --formatter)
-#        options+=("$1" "${2/bashpro/pretty}")
         options+=("$1" "$2")
         shift
         ;;

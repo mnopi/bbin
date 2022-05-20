@@ -1,12 +1,10 @@
 #!/usr/bin/env bats
 
-#setup_file() { load ../helpers/helper; }
-
 @test "status " {
   run true
   [ "$status" -eq 0 ]
 }
-
+$G
 @test "assert " {
   assert declare -pF assert
 }
