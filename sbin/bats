@@ -222,7 +222,8 @@ EOF
 
     formatter_patch="${BATS_SHARE}/bats-core/libexec/bats-core/bats"
     if ! grep -q "${BATS_BASHPRO_FORMATTER}" "${formatter_patch}"; then
-      sed -i "" "s/, tap13/, tap13, ${BATS_BASHPRO_FORMATTER}/; s/tap13|cat/tap13|cat|${BATS_BASHPRO_FORMATTER}/" "${formatter_patch}"
+      sed -i "" "s/, tap13/, tap13, ${BATS_BASHPRO_FORMATTER}/; s/tap13|cat/tap13|cat|${BATS_BASHPRO_FORMATTER}/" \
+        "${formatter_patch}"
     fi
 
     formatter_file="bats-format-${BATS_BASHPRO_FORMATTER}"
