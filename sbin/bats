@@ -10,6 +10,10 @@
 # </html>
 export BATS_ARRAY=()
 
+# Bashpro Bats Formatter
+#
+export BATS_BASHPRO_FORMATTER="bashpro"
+
 # Command Executed (variable set by: bats).
 #
 export BATS_COMMAND
@@ -193,6 +197,43 @@ bats::tmp() {
 }
 
 #######################################
+# bashpro patch
+# Arguments:
+#  None
+#######################################
+_bashpro() {
+  local bats_dst bats_src formatter_dst formatter_file formatter_patch formatter_src line plugin properties
+  while read -r properties; do
+    test -f "${properties}" || continue
+
+    plugin="$(awk -F '=' '/idea.plugins.path=/ { print $2 }' "${properties}")/bashsupport-pro/bats-core"
+    test -d "${plugin}" || continue
+
+    bats_dst="${plugin}/bin/bats"
+    line="exec bats"
+    if ! grep -q "${line}" "${bats_dst}"; then
+      cp "${bats_dst}" "${bats_dst}.bak"
+      cat > "${bats_dst}" <<EOF
+#!/usr/bin/env bash
+${line} "\$@"
+EOF
+      chmod +x "${bats_dst}"
+    fi
+
+    formatter_patch="${BATS_SHARE}/bats-core/libexec/bats-core/bats"
+    if ! grep -q "${BATS_BASHPRO_FORMATTER}" "${formatter_patch}"; then
+      sed -i "" "s/, tap13/, tap13, ${BATS_BASHPRO_FORMATTER}/; s/tap13|cat/tap13|cat|${BATS_BASHPRO_FORMATTER}/" "${formatter_patch}"
+    fi
+
+    formatter_file="bats-format-${BATS_BASHPRO_FORMATTER}"
+    formatter_dst="${BATS_SHARE}/bats-core/libexec/bats-core/${formatter_file}"
+    ! test -e "${formatter_dst}" || continue
+    formatter_src="${plugin}/libexec/bats-core/${formatter_file}"
+    echo ln -s "${formatter_src}" "${formatter_dst}"
+  done < <(env | awk -F '=' '/^[A-Z].*_PROPERTIES=/ { print $2 }')
+}
+
+#######################################
 # clone bats-core and bats libs
 # Globals:
 #   BATS_EXECUTABLE
@@ -256,7 +297,7 @@ _bats_pull() {
 #######################################
 _die() {
   local rc=$?
-  >&2 printf '%b\n' "\033[1;31m✘\033[0m ${REPO}: $*"
+  >&2 printf '%b\n' "\033[1;31m✘\033[0m ${BASH_SOURCE[0]##*/}: $*"
   "${RETURN:-exit}" $rc
 }
 
@@ -343,6 +384,7 @@ to the \$BATS_TEST_DIR
 
 Commands:
   -h, --help, help          display this help and exit
+  bashpro                   patches bashpro plugin (remove in run configuration to add to PATH)
   commands                  display ${script}' commands
   functions                 display functions available when ${script} is sourced
   list                      display tests found relative to current working directory
@@ -387,6 +429,7 @@ _unsets() {
 #   None
 #######################################
 _main() {
+  # TODO: añadir lo de que se ejecute el bats bashpro cuando se salga del IDE
   local sourced=false
   [ "${BASH_SOURCE##*/}" = "${0##*/}" ] || sourced=true
 
@@ -401,7 +444,6 @@ _main() {
 
   ! $sourced || { _unsets; return; }
 
-  return
   set -eu
   shopt -s inherit_errexit
 
@@ -441,7 +483,8 @@ _main() {
         shift
         ;;
       -F | --formatter)
-        options+=("$1" "${2/bashpro/pretty}")
+#        options+=("$1" "${2/bashpro/pretty}")
+        options+=("$1" "$2")
         shift
         ;;
       -d | --dry-run) dry=true ;;
@@ -496,6 +539,7 @@ _main() {
         options+=("$1")
         ;;
       -v | --version) options+=("$1") ;;
+      bashpro) _bashpro; exit ;;
       commands)
         printf '%s\n' -h --help help "$1" functions list | sort
         exit

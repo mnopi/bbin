@@ -217,11 +217,15 @@
 !/bin/bbin
 !/bin/filefuncs
 !/bin/funcexported
+!/bin/printarr
 ## /etc
+!/etc/bash_completion.d/bats
 !/etc/profile.d/00-constants.sh
 !/etc/profile
 ## /libexec
 !/libexec
+## /share
+!/share/bashpro
 ## /sbin
 !/sbin/bats
 ## /tests
