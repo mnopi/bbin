@@ -215,18 +215,17 @@
 !/Bbin.app
 ## /bin
 !/bin/bbin
+!/bin/filefuncs
+!/bin/funcexported
 ## /etc
 !/etc/profile.d/00-constants.sh
 !/etc/profile
 ## /libexec
-!/libexec/bats.bash
-!/libexec/paths.sh
-!/libexec/utils.bash
-!/libexec/utils.sh
+!/libexec
 ## /sbin
 !/sbin/bats
 ## /tests
-!/tests/helpers/helper.bash
+!/tests
 ## /
 !/.rubocop.yml
 !/console

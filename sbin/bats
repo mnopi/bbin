@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2155,SC2046
 
+# TODO: patch del formatter, envrc
+
+. paths.sh
+
 # <html><h2>Bats Description Array</h2>
 # <p><strong><code>$BATS_ARRAY</code></strong> created by bats::array() with $BATS_TEST_DESCRIPTION.</p>
 # </html>
@@ -10,18 +14,36 @@ export BATS_ARRAY=()
 #
 export BATS_COMMAND
 
+# Installation Directory for bats-core and bats libs
+#
+export BATS_SHARE="${HOME}/.local/share"; mkdir -p "${BATS_SHARE}"
+
 # Bats Core executable path
 #
-export BATS_EXECUTABLE="$(brew --prefix bats-core)/bin/bats"
+export BATS_EXECUTABLE="${BATS_SHARE}/bats-core/bin/bats"
 
 # <html><h2>Array with Bats Libs Functions and Helper Functions Provided by bats/bats.sh</h2>
 # <p><strong><code>$BATS_FUNCTIONS</code></strong> created by bats::array() with $BATS_TEST_DESCRIPTION.</p>
 # </html>
-export BATS_FUNCTIONS=()
+export BATS_FUNCTIONS
 
 # Gather the output of failing *and* passing tests as files in directory (variable set by: bats).
 #
 export BATS_GATHER
+
+# <html><h2>Saved $INFOPATH on First Suite Test Start</h2>
+# <p><strong><code>$BATS_INFOPATH</code></strong></p>
+# </html>
+export BATS_INFOPATH="${INFOPATH}"
+
+# Bats Libs Repositories
+#
+export BATS_LIBS="bats-assert bats-file bats-support"
+
+# <html><h2>Saved $MANPATH on First Suite Test Start</h2>
+# <p><strong><code>$BATS_MANPATH</code></strong></p>
+# </html>
+export BATS_MANPATH="${MANPATH}"
 
 # Directory to write report files (variable set by: bats).
 #
@@ -31,6 +53,10 @@ export BATS_OUTPUT
 # <p><strong><code>$BATS_PATH</code></strong></p>
 # </html>
 export BATS_PATH="${PATH}"
+
+# Bats Core and Bats Libs Repositories
+#
+export BATS_REPOS="bats-core ${BATS_LIBS}"
 
 # Path to the test directory, passed as argument or found by 'bats' (variable set by: bats).
 #
@@ -68,6 +94,10 @@ export BATS_TOP="$(git rev-parse --show-toplevel 2>/dev/null || true)"
 # </html>
 export BATS_BASENAME="${BATS_TOP##*/}"
 
+export INFOPATH
+
+export MANPATH
+
 #######################################
 # Restores $PATH to $BATS_PATH and sources .envrc.
 # Globals:
@@ -77,8 +107,12 @@ export BATS_BASENAME="${BATS_TOP##*/}"
 #######################################
 bats::env() {
   bats::cd
+
   PATH="${BATS_PATH}"
-  # TODO: dedup
+  MANPATH="${BATS_MANPATH}"
+  INFOPATH="${BATS_INFOPATH}"
+  path_add_exist_all "${BATS_TOP}"
+# TODO: envfile
   #  . "$(dirname "${BASH_SOURCE[0]}")/envfile.sh"
   #  envfile
 }
@@ -159,13 +193,71 @@ bats::tmp() {
 }
 
 #######################################
-# show error and exit 1
+# clone bats-core and bats libs
+# Globals:
+#   BATS_EXECUTABLE
+#   BATS_REPOS
+#   BATS_SHARE
 # Arguments:
-#   * message
+#  None
+# Returns:
+#   0 ...
+#######################################
+_bats_clone() {
+  ! test -x "${BATS_EXECUTABLE}" || return 0
+  local i
+  for i in ${BATS_REPOS}; do
+    git -C "${BATS_SHARE}" clone --quiet --depth 1 "https://github.com/bats-core/${i}" || return
+  done
+}
+
+#######################################
+# bats libs
+# Globals:
+#   BASH_SOURCE
+#   __brew_lib
+#   i
+# Arguments:
+#  None
+# Returns:
+#   1 ...
+#######################################
+_bats_libs() {
+  local file i
+  for i in ${BATS_LIBS}; do
+    file="${BATS_SHARE}/${i}/load.bash"
+    . "${file}" || RETURN="return" _die "${file}: sourcing error"
+  done
+}
+
+#######################################
+# pull bats-core and bats libs
+# Globals:
+#   BATS_REPOS
+#   BATS_SHARE
+# Arguments:
+#  None
+# Returns:
+#   0 ...
+#######################################
+_bats_pull() {
+  local i
+  for i in ${BATS_REPOS}; do
+    git -C "${BATS_SHARE}/${i}" pull --quiet
+  done
+}
+
+#######################################
+# die with return or exit
+# Globals:
+#   RETURN
+# Arguments:
+#   None
 #######################################
 _die() {
-  echo >&2 "${0##*/}: ${*}"
-  exit 1
+  local rc=$?
+  >&2 printf '%b\n' "\033[1;31m✘\033[0m ${REPO}: $*"
+  "${RETURN:-exit}" $rc
 }
 
 #######################################
@@ -187,23 +279,6 @@ _directory() {
 }
 
 #######################################
-# checks if function is exported
-# Globals:
-#   FUNCNAME
-# Arguments:
-#   1   function name
-# Returns:
-#   1 if function is not exported,
-#   0 if function is exported
-#######################################
-_exported() {
-  if ! declare -Fp "$1" 2>/dev/null | grep -q "declare -fx ${1}" >/dev/null; then
-    echo >&2 "${BASH_SOURCE[0]}: ${1}: function not exported"
-    return 1
-  fi
-}
-
-#######################################
 # check if is file suffix is "*.bats" and adds to BATS_TESTS
 # Globals:
 #   BATS_TESTS
@@ -218,11 +293,24 @@ _file() {
 }
 
 #######################################
-# get functions in file/files
+# export bats functions
+# Globals:
+#   ${BATS_FUNCTIONS[@]}
+#   BASH_SOURCE
+#   BATS_FUNCTIONS
+#   BATS_SHARE
 # Arguments:
 #  None
 #######################################
-_functions() { awk -F '(' '/^[a-z].*\(\)/ && ! /=\(/ { print $1 }' "$@"; }
+_functions(){
+  mapfile -t BATS_FUNCTIONS < <(
+    filefuncs "${BATS_SHARE}"/bats-*/src/*.bash &&
+    filefuncs "${BASH_SOURCE[0]}"
+  )
+
+  # bashsupport disable=BP2001
+  export -f "${BATS_FUNCTIONS[@]}" && funcexported assert
+}
 
 #######################################
 # show help and exit
@@ -283,26 +371,12 @@ EOF
 }
 
 #######################################
-# bats libs
-# Globals:
-#   BASH_SOURCE
-#   __brew_lib
-#   i
+# unsets functions
 # Arguments:
 #  None
-# Returns:
-#   1 ...
 #######################################
-_libs() {
-  local i
-  __brew_lib="$(brew --prefix)/lib"
-  for i in bats-assert bats-file bats-support; do
-    if ! . "${__brew_lib}/${i}/load.bash"; then
-      echo >&2 "${BASH_SOURCE[0]}: ${__brew_lib}/${i}/load.bash: sourcing error"
-      return 1
-    fi
-  done
-  unset i
+_unsets() {
+  unset -f _bats_clone _bats_libs _bats_pull _die _directory _file _help _main _unsets
 }
 
 #######################################
@@ -313,18 +387,20 @@ _libs() {
 #   None
 #######################################
 _main() {
-  # TODO: patch del formatter, envrc
-  _libs
-  mapfile -t BATS_FUNCTIONS < <(
-    _functions "${__brew_lib}"/*/src/*.bash &&
-    _functions "${BASH_SOURCE[0]}" &&
-    awk -F '(' "/^$(basename "${BASH_SOURCE[0]}" .sh)::.*\(\)/ { gsub(/ /,\"\",\$1); print \$1 }" "${BASH_SOURCE[0]}"
-  )
-  # bashsupport disable=BP2001
-  export -f "${BATS_FUNCTIONS[@]}" && _exported assert && _exported bats::env && bats::env
-  unset -f _die _directory _file _functions _help _libs
+  local sourced=false
+  [ "${BASH_SOURCE##*/}" = "${0##*/}" ] || sourced=true
 
-  [ "${BASH_SOURCE##*/}" = "${0##*/}" ] || return
+  ! $sourced || { $sourced && ! funcexported assert 2>/dev/null; } || { _unsets; return; }
+
+  _bats_clone || return
+  $sourced || _bats_pull || return
+  _bats_libs || return
+  _functions || return
+  funcexported bats::env || return
+  bats::env || return
+
+  ! $sourced || { _unsets; return; }
+
   return
   set -eu
   shopt -s inherit_errexit
@@ -379,7 +455,8 @@ _main() {
         options+=("$1" "$2")
         shift
         ;;
-      --man|--man7) man "$(brew --prefix bats-core)/share/man/${1}/bats.${1##*.}"; exit ;;
+      --man) man "${BATS_SHARE}/bats-core/man/bats.1"; exit ;;
+      --man7) man "${BATS_SHARE}/bats-core/man/bats.7"; exit ;;
       --no-parallelize-across-files) no_parallelize_across_files=("$1") ;;
       --no-parallelize-within-files) no_parallelize_within_files=("$1") ;;
       --no-tempdir-cleanup)
