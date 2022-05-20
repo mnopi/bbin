@@ -447,6 +447,7 @@ _unsets() {
 #   None
 #######################################
 _main() {
+  # TODO: ver que funcionan tests parciales
   local sourced=false
   [ "${BASH_SOURCE##*/}" = "${0##*/}" ] || sourced=true
 
@@ -612,7 +613,7 @@ _main() {
 
   if [ ! "${BATS_TESTS-}" ] && ! _directory "$(pwd)"; then
     if [ "${BATS_TOP-}" ]; then
-      for i in __tests__ test test; do
+      for i in __tests__ test tests; do
         directory="${BATS_TOP}/${i}"
         ! test -d "${directory}" || _directory "${directory}" || true
       done

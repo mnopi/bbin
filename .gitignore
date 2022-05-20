@@ -234,4 +234,5 @@
 !/.rubocop.yml
 !/console
 !/Gemfile
+!/Makefile
 ### END
