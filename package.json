@@ -6,7 +6,7 @@
   "files": [
     "package.json"
   ],
-  "peerDependencies": {
+  "dependencies": {
     "cloudflare-cli": "*",
     "shaurl": "*",
     "spoof": "*",
