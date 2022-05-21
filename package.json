@@ -1,12 +1,15 @@
 {
   "name": "bbin",
-  "version": "1.0.23",
+  "version": "1.0.24",
   "description": "bbin global installs",
   "license": "MIT OR Apache-2.0",
   "files": [
     "package.json"
   ],
   "bundledDependencies": true,
+  "bin": {
+    "cfcli": "node_modules/.bin/cfcli"
+  },
   "dependencies": {
     "cloudflare-cli": "*",
     "semver": "*",
