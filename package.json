@@ -1,18 +1,13 @@
 {
   "name": "bbin",
-  "version": "1.0.27",
+  "version": "1.0.28",
   "description": "bbin global installs",
   "license": "MIT OR Apache-2.0",
   "files": [
     "package.json"
   ],
-  "bin": {
-    "cfcli": "node_modules/.bin/cfcli",
-    "semver": "node_modules/.bin/semver",
-    "shaurl": "node_modules/.bin/shaurl",
-    "spoof": "node_modules/.bin/spoof",
-    "vercel": "node_modules/.bin/vercel",
-    "wrangler": "node_modules/.bin/wrangler"
+  "directories": {
+    "bin": "node_modules/.bin"
   },
   "bundledDependencies": true,
   "dependencies": {
