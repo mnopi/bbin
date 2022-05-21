@@ -1,6 +1,6 @@
 {
   "name": "bbin",
-  "version": "1.0.17",
+  "version": "1.0.18",
   "description": "bbin global installs",
   "license": "MIT OR Apache-2.0",
   "files": [
@@ -14,7 +14,8 @@
     "vercel": "node_modules/.bin/vercel",
     "wrangler": "node_modules/.bin/wrangler"
   },
-  "devDependencies": {
+  "bundledDependencies": true,
+  "dependencies": {
     "cloudflare-cli": "*",
     "semver": "*",
     "shaurl": "*",
