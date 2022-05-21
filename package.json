@@ -1,6 +1,6 @@
 {
   "name": "bbin",
-  "version": "1.0.28",
+  "version": "1.0.29",
   "description": "bbin global installs",
   "license": "MIT OR Apache-2.0",
   "files": [
@@ -9,7 +9,6 @@
   "directories": {
     "bin": "node_modules/.bin"
   },
-  "bundledDependencies": true,
   "dependencies": {
     "cloudflare-cli": "*",
     "semver": "*",
