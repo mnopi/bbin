@@ -1,13 +1,22 @@
 {
   "name": "bbin",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "bbin global installs",
   "license": "MIT OR Apache-2.0",
   "files": [
     "package.json"
   ],
-  "devDependencies": {
+  "bin": {
+    "cfcli": "node_modules/.bin/cfcli",
+    "semver": "node_modules/.bin/semver",
+    "shaurl": "node_modules/.bin/shaurl",
+    "spoof": "node_modules/.bin/spoof",
+    "vercel": "node_modules/.bin/vercel",
+    "wrangler": "node_modules/.bin/wrangler"
+  },
+  "dependencies": {
     "cloudflare-cli": "*",
+    "semver": "*",
     "shaurl": "*",
     "spoof": "*",
     "vercel": "*",
