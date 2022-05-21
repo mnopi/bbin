@@ -5,8 +5,6 @@ set -eu
 OWNER="j5pu"
 REPO="bbin"
 HOMEBREW_BREW_GIT_REMOTE="https://github.com/${OWNER}/${REPO}"
-UNAME="$(uname)"
-MACHINE="$(uname -m)"
 
 #######################################
 # check if current working directory exists and exit if not
@@ -16,8 +14,8 @@ MACHINE="$(uname -m)"
 #   None
 #######################################
 cwd() {
-  test -d "$(pwd -P)" || die "Current working directory does not exist: $(pwd -P)"
   CWD="$(pwd -P)"
+  test -d "${CWD}" || die "Current working directory does not exist: $(pwd -P)"
 }
 
 #######################################
@@ -92,36 +90,12 @@ EOF
 }
 
 prefix() {
-
-  if [ "${0##*/}" = "${REPO}" ]; then
-    # can be executed in temp if not development.
-    cd "$(dirname "$0")/.."
-    HOMEBREW_PREFIX="$(pwd -P)"; export HOMEBREW_PREFIX
-
-  else
-    echo clone
-  fi
-  if $development; then
-    :
-  else
-    :
-  fi
-  cwd
-  echo "${HOMEBREW_PREFIX}" | grep -qvE "^/private/tmp|^/tmp" \
-    || die "${HOMEBREW_PREFIX}: installation can not be done in temp directory"
-  ! $prefix || { echo "${HOMEBREW_PREFIX}"; exit; }
+:
 }
 
-#######################################
-# absolute physical path
-# Arguments:
-#   1   path
-#######################################
-real() { echo "$(cd "$(dirname "$1")"; pwd -P)/$(basename "$1")"; }
-
 main() {
-  development=false; prefix=false; with_homebrew=false
-  check if cwd is in git repository
+  development=false; prefix=false; shellenv=false; with_homebrew=false
+
   for arg; do
     case "${arg}" in
       -h|--help|help) help; return ;;
@@ -129,6 +103,7 @@ main() {
       --password=*) password="${arg#*=}" ;;
       --with-homebrew) with_homebrew=true ;;
       prefix) prefix=true ;;
+      shellenv) shellenv=true: ;;
       *) help "${arg}: invalid command/option" ;;
     esac
   done
@@ -137,21 +112,22 @@ main() {
 
 }
 
+cwd
+case "${0##*/}" in
+  -ash|ash|-bash|bash|-busybox|busybox|-dash|dash|-ksh|ksh|-sh|sh|-zsh|zsh)
+    local=false
+    prefix="${CWD}"
+    #
+    ;;
+  *)
+    local=true
+    bin="$(cd "$(dirname "$0")"; pwd -P)"
+    PATH="${bin}:${PATH}"
+    prefix="$(dirname "${bin}")"
+    #
+    ;;
+esac
+
 main "$@"
 }
-
-
-
-! test -f .env || . .env
-
-./bin/brew update --force --quiet
-chmod -R go-w ./bin/brew/share/zsh 2>/dev/null
-git pull --quiet --tags
-test -z "$(git stash list)" || git stash pop --quiet
-
-#brew tap "${BREW_OWNER}/tap"
-sudo chmod -R g+w /Library/Developer /Library/Java /Library/Perl /Library/Python /Library/Ruby
-sudo chown -R :admin /Library/Developer /Library/Java /Library/Perl /Library/Python /Library/Ruby
-
-# TODO: PROBAR CON EL HOMEBREW_CORE TAMBIEN CLONE. y el ignore ! y con la veriable exportada.
 

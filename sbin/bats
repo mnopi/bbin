@@ -4,6 +4,7 @@
 # TODO: envrc
 
 . paths.sh
+. utils.bash
 
 # <html><h2>Bats Description Array</h2>
 # <p><strong><code>$BATS_ARRAY</code></strong> created by bats::array() with $BATS_TEST_DESCRIPTION.</p>
@@ -75,11 +76,6 @@ export BATS_TESTS
 # </html>
 export BATS_REMOTE=()
 
-# <html><h2>Test File Basename Without Suffix .bats</h2>
-# <p><strong><code>$BATS_TEST_BASENAME</code></strong> from $BATS_TEST_FILENAME.</p>
-# </html>
-export BATS_TEST_BASENAME="$(basename "${BATS_TEST_FILENAME-}" .bats)"
-
 # Path to the test directory, passed as argument or found by 'bats' (variable set by: bats).
 #
 export BATS_TEST_DIR
@@ -116,6 +112,7 @@ bats::env() {
   MANPATH="${BATS_MANPATH}"
   INFOPATH="${BATS_INFOPATH}"
   path_add_exist_all "${BATS_TOP}"
+  ! test -f "${BATS_TOP}/.env" || source "${BATS_TOP}/.env"
 # TODO: envfile
   #  . "$(dirname "${BASH_SOURCE[0]}")/envfile.sh"
   #  envfile
@@ -131,7 +128,7 @@ bats::env() {
 bats::array() { mapfile -t BATS_ARRAY < <(xargs printf '%s\n' <<<${BATS_TEST_DESCRIPTION}); }
 
 #######################################
-# creates $BATS_ARRAY array from $BATS_TEST_DESCRIPTION or argument
+# Bats Test File Basename Without Suffix
 # Globals:
 #   BATS_ARRAY
 #   BATS_TEST_DESCRIPTION
@@ -360,7 +357,7 @@ _functions(){
   )
 
   # bashsupport disable=BP2001
-  export -f "${BATS_FUNCTIONS[@]}" && funcexported assert
+  export -f "${BATS_FUNCTIONS[@]}" && funcexported assert && funcexported bats::env
 }
 
 #######################################
@@ -455,7 +452,7 @@ _main() {
   $sourced || _bats_pull || return
   _bats_libs || return
   _functions || return
-  funcexported bats::env || return
+
   bats::env || return
 
   ! $sourced || { _unsets; return; }

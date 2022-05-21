@@ -4,7 +4,7 @@
   run true
   [ "$status" -eq 0 ]
 }
-$G
+
 @test "assert " {
   assert declare -pF assert
 }

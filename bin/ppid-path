@@ -1,0 +1,64 @@
+#!/bin/sh
+
+#
+# PPID path
+
+set -eu
+
+#######################################
+# show usage
+# Arguments:
+#   1
+#######################################
+help() {
+  test $# -gt 0 || return 0
+  case "$1" in
+    -h | --help | help) rc=0 ;;
+    -*) printf >&2 '%b\n\n' "\033[1;31m✘\033[0m ${0##*/}: $1: invalid option/argument" ;;
+  esac
+
+  cat >&2 <<EOF
+usage: ${0##*/}
+   or: ${0##*/} -h|--help|help
+
+path of parent executable
+
+Commands:
+   -h, --help, help   display this help and exit.
+
+Examples:
+   cat > etc/profile <<EXAMPLE
+!/bin/sh
+if test -f /bbin/bin/ppid-path; then
+  /bbin/bin/ppid-path
+else
+  ppid-path
+fi
+EXAMPLE
+   chmod +x etc/profile
+   docker run -it --rm -v \$PWD:/bbin alpine
+   $ bbin/etc/profile
+   PATH=\$PWD/bin:\$PATH etc/profile
+EOF
+  exit "${rc:-1}"
+}
+
+relative() {
+  if test -f /proc/$PPID/cmdline; then
+    tr "\000" "\n" </proc/$PPID/cmdline | tail -1
+  else
+    ps -o pid= -o args= | command sed -n "s/^ \{0,\}$PPID //p" | tr " " "\n" | tail -1
+  fi
+}
+
+#######################################
+# path of parent executable
+# Arguments:
+#   None
+#######################################
+main() {
+  help "$@"
+  "$(command -v realpath || command -v readlink)" "$(relative)"
+}
+
+main "$@"
