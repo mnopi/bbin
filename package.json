@@ -1,12 +1,19 @@
 {
   "name": "bbin",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "bbin global installs",
   "license": "MIT OR Apache-2.0",
   "files": [
     "package.json"
   ],
   "bundledDependencies": true,
+  "peerDependencies": {
+    "cloudflare-cli": "*",
+    "shaurl": "*",
+    "spoof": "*",
+    "vercel": "*",
+    "wrangler": "*"
+  },
   "dependencies": {
     "cloudflare-cli": "*",
     "shaurl": "*",
