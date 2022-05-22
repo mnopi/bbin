@@ -1,7 +1,7 @@
 #!/usr/bin/env bats
 
 setup() {
-  . path.sh
+  . paths.sh
 }
 
 @test "path_in /bin MANPATH " {
