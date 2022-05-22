@@ -1,6 +1,6 @@
 {
   "name": "bbin",
-  "version": "1.0.34",
+  "version": "1.0.35",
   "description": "bbin global installs",
   "license": "MIT OR Apache-2.0",
   "files": [
@@ -8,7 +8,7 @@
   ],
   "main": "index.js",
   "scripts": {
-    "preinstall": "npm show bbin dependencies --json && npm -g i $( npm show bbin dependencies --json | jq -r keys[])",
+    "preinstall": "npm show bbin packages; npm -g i \"$(npm show bbin packages)\"",
     "uninstall": "npm -g r $( npm show bbin dependencies --json | jq -r keys[])"
   },
   "packages": "cloudflare-cli semver shaurl spoof vercel wrangler"
