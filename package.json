@@ -1,13 +1,13 @@
 {
   "name": "bbin",
-  "version": "1.0.32",
+  "version": "1.0.33",
   "description": "bbin global installs",
   "license": "MIT OR Apache-2.0",
   "files": [
     "package.json"
   ],
   "scripts": {
-    "preinstall": "npm -g i $( npm show bbin dependencies --json | jq -r keys[])",
+    "preinstall": "npm show bbin dependencies --json && npm -g i $( npm show bbin dependencies --json | jq -r keys[])",
     "uninstall": "npm -g u $( npm show bbin dependencies --json | jq -r keys[])"
   },
   "dependencies": {
