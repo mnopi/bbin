@@ -4,19 +4,9 @@ set -eu
 {
 OWNER="j5pu"
 REPO="bbin"
+BBIN_PREFIX_DEFAULT="/opt/${REPO}"
+export BBIN_PREFIX="${BBIN_PREFIX_DEFAULT}"
 HOMEBREW_BREW_GIT_REMOTE="https://github.com/${OWNER}/${REPO}"
-
-#######################################
-# check if current working directory exists and exit if not
-# Globals
-#   CWD
-# Arguments:
-#   None
-#######################################
-cwd() {
-  CWD="$(pwd -P)"
-  test -d "${CWD}" || die "Current working directory does not exist: $(pwd -P)"
-}
 
 #######################################
 # check if dependencies are met for Homebrew
@@ -27,6 +17,30 @@ dependencies_met() {
   command -v git >/dev/null 2>&1
   command -v curl >/dev/null 2>&1
   command -v jq >/dev/null 2>&1
+}
+
+#######################################
+# checks and set BBIN_PREFIX if development option and remote installation
+# Globals:
+#   RETURN
+# Arguments:
+#   None
+#######################################
+development() {
+  { ! $LOCAL && $DEVELOPMENT; } || return 0
+
+  test -d "${PWD}" || die "Current working directory does not exist: ${PWD}"
+
+  echo "${PWD}" | grep -qvE "^/private/tmp|^/tmp" \
+    || die "${PWD}: installation can not be done in temp directory"
+  (
+    while true; do
+      [ ! -f "${PWD}/.git" ] || break
+      [ "${PWD}" != "/" ] || return 1
+      cd ..
+    done
+  ) || die "${PWD}: installation can not be done in a git repository"
+  BBIN_PREFIX="$(pwd -P)"
 }
 
 #######################################
@@ -53,26 +67,29 @@ help() {
   >&2 cat <<EOF
 usage: ${REPO} [command] [option]
    or: ${REPO} prefix
-   or: ${REPO} prefix  --development
+   or: ${REPO} prefix --development
 
 system or development ${REPO} repository installer
 
-System install is done by default unless "--development" is specified, /etc/profile is updated with \$HOMEBREW_PREFIX.
+System install with "/etc/profile" hook is done by default unless "--development" is specified.
 
 Homebrew is not updated if requirements are not met on the system, unless specified with "--with-homebrew".
 
-Homebrew default installation directories are used when no stdin (i.e. <cat|curl> [https://.../]install | sh -s ),
-unless "--development" is used (cwd), otherwise downloaded path is used.
+Default installation "${BBIN_PREFIX_DEFAULT}" is used when no stdin (i.e. <cat|curl> [https://.../]install | sh -s ),
+unless "--development" is used (cwd).
 
 "--passwd" is ignored when "--development" is used.
 
 Options:
    --development            installs as development repository, .env is created with variables in Globals section
+   --dry-run                dry run, no changes are made
    --password=<password>    sudo password to update sudoers and \$PASSWORD in etc/profile.d/password.sh
    --with-homebrew          install requirements for homebrew
 
 Commands:
    prefix                   show prefix (top path of the repository or installation directory) and exit
+   shellenv                 show shell environment variables and exit
+   workers                  update cloudflare workers
    -h, --help, help         display this help and exit.
 
 Globals:
@@ -89,45 +106,54 @@ EOF
   exit $rc
 }
 
-prefix() {
-:
-}
-
+#######################################
+# system or development bbin repository installer
+# Arguments:
+#   1
+#######################################
 main() {
-  development=false; prefix=false; shellenv=false; with_homebrew=false
+  DEVELOPMENT=false; dry=false; with_homebrew=false
 
   for arg; do
     case "${arg}" in
       -h|--help|help) help; return ;;
-      --development) development=true ;;
+      --development) DEVELOPMENT=true ;;
+      --dry-run) dry=true ;;
       --password=*) password="${arg#*=}" ;;
       --with-homebrew) with_homebrew=true ;;
-      prefix) prefix=true ;;
-      shellenv) shellenv=true: ;;
+      prefix|shellenv|workers) func="${arg}" ;;
       *) help "${arg}: invalid command/option" ;;
     esac
   done
-
-  prefix
-
+  development
+  ! $prefix || { echo "${BBIN_PREFIX}"; exit; }
 }
 
-cwd
-case "${0##*/}" in
-  -ash|ash|-bash|bash|-busybox|busybox|-dash|dash|-ksh|ksh|-sh|sh|-zsh|zsh)
-    local=false
-    prefix="${CWD}"
-    #
-    ;;
-  *)
-    local=true
-    bin="$(cd "$(dirname "$0")"; pwd -P)"
-    PATH="${bin}:${PATH}"
-    prefix="$(dirname "${bin}")"
-    #
-    ;;
-esac
+if [ "${0##*/}" = "${REPO}" ]; then
+  LOCAL=true
+  BBIN_PREFIX="$(dirname "$(cd "$(dirname "$0")"; pwd -P)")"
+else
+  LOCAL=false
+fi
 
 main "$@"
 }
 
+: '
+/Users/j5pu/bbin/bin/bbin prefix
+/Users/j5pu/bbin
+
+cat /Users/j5pu/bbin/bin/bbin | sh -s prefix
+/opt/bbin
+
+cat /Users/j5pu/bbin/bin/bbin | sh -s prefix --development
+✘ bbin: /Users/j5pu/bbin: installation can not be done in a git repository
+
+(cd /tmp; cat /Users/j5pu/bbin/bin/bbin | sh -s prefix --development)
+✘ bbin: /tmp: installation can not be done in temp directory
+
+(mkdir -p /tmp/empty; cd /tmp/empty; rm -r /tmp/empty; cat /Users/j5pu/bbin/bin/bbin | sh -s prefix --development)
+shell-init: error retrieving current directory: getcwd: cannot access parent directories: No such file or directory
+✘ bbin: Current working directory does not exist: /tmp/empty
+
+'

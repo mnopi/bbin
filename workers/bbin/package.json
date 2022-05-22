@@ -1,0 +1,18 @@
+{
+  "name": "bbin",
+  "version": "1.0.0",
+  "description": "bbin worker",
+  "devDependencies": {
+    "cloudflare-cli": "*",
+    "start-server-and-test": "*",
+    "tap": "*",
+    "wrangler": "*"
+  },
+  "scripts": {
+    "record": "n=bbin.${CF_API_DOMAIN?}; cfcli find -t AAAA -q name:$n | grep -q $n || cfcli -a -t AAAA add bbin 100::",
+    "start": "wrangler dev",
+    "publish": "npm run ci && npm run record && wrangler publish --route bbin.$CF_API_DOMAIN",
+    "test": "tap ../../tests/workers/bbin/local.mjs",
+    "ci": "server-test 8787"
+  }
+}

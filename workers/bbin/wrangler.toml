@@ -1,0 +1,8 @@
+name = "bbin"
+main = "event.js"
+compatibility_date = "2022-05-22"
+
+[[kv_namespaces]]
+binding = "kv"
+id = "0fe30886bb3a4591bc8b9d8d13237495"
+preview_id = "811c59a62a6a47618e2b157425705768"

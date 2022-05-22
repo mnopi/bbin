@@ -1,0 +1,9 @@
+#!/bin/sh
+
+#
+# npm login when 2FA is not enabled for writing to the registry and ~/.npmrc update
+
+line="//registry.npmjs.org/:_authToken=${NPM_TOKEN}"
+if grep -q "${line}" ~/.npmrc; then
+  npm config set "${line}"
+fi

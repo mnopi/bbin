@@ -1,0 +1,49 @@
+#!/bin/sh
+
+#
+# npm login when 2FA is enabled for writing to the registry and ~/.npmrc update
+# https://github.com/bravissimolabs/docker-generate-npm-authtoken/blob/master/bin/npm.sh
+
+set -eu
+
+tmp_two="$(mktemp)"
+if [ "${1-}" ]; then
+  NPM_TOKEN="${INTERNET?}"
+  cat > "${tmp_two}" <<EOF
+expect "Enter one-time password: "
+send "${1}\r";
+
+EOF
+fi
+
+tmp="$(mktemp)"
+cat > "${tmp}" << EOF
+#!/usr/bin/expect -f
+set timeout 20
+
+eval spawn npm login --registry ${NPM_REGISTRY:-https://registry.npmjs.org} ${NPM_SCOPE:+--scope=${NPM_SCOPE}}
+
+expect "Username: "
+send "${NPM_USER}\r";
+
+expect "Password: "
+send "${NPM_TOKEN}\r";
+
+expect "Email: (this IS public) "
+send "${NPM_EMAIL}\r";
+
+$(cat "${tmp_two}")
+
+expect eof
+
+puts \$expect_out(buffer)
+EOF
+chmod +x "${tmp}"
+"${tmp}"
+
+if line="$(grep -q '//registry.npmjs.org/:_authToken' ~/.npmrc)"; then
+  echo "${line}"
+else
+  echo "error logging into npm"
+  exit 1
+fi 
