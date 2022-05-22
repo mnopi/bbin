@@ -1,6 +1,6 @@
 {
   "name": "bbin",
-  "version": "1.0.43",
+  "version": "1.0.44",
   "description": "bbin global installs",
   "license": "MIT OR Apache-2.0",
   "files": [
@@ -8,11 +8,13 @@
   ],
   "main": "index.js",
   "scripts": {
-    "preinstall": "npm -g i $(npm show bbin packages)",
-    "uninstall": "npm -g r $(npm show bbin packages) bbin",
-    "prepush": "git commit -q -m \"npmjs: $(npm --no-git-tag-version version patch)\" README.md package.json",
-    "push": "git push -q && npm-auth",
-    "prepublishOnly": "npm run push -q"
+    "prepush": "git commit --quiet -m \"npmjs: $(npm --no-git-tag-version version patch)\" README.md package.json",
+    "push": "git push --quiet && npm-auth",
+    "prepublishOnly": "npm run --quiet push",
+    "preinstall": "npm -g install --quiet $(npm show bbin packages)",
+    "install": "npm -g install --quiet bbin",
+    "uninstall": "npm -g uninstall --quiet $(npm show bbin packages) bbin",
+    "npmjs": "npm publish --quiet && npm run --quiet install"
   },
   "packages": "cloudflare-cli semver shaurl spoof vercel wrangler"
 }
