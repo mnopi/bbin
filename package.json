@@ -1,12 +1,11 @@
 {
   "name": "bbin",
-  "version": "1.0.49",
+  "version": "1.0.50",
   "description": "bbin global installs",
   "license": "MIT OR Apache-2.0",
   "files": [
     "package.json"
   ],
-  "main": "index.js",
   "scripts": {
     "commit": "git commit --quiet -m \"npmjs: $(npm --no-git-tag-version version patch)\" README.md package.json",
     "prepublishOnly": "npm run commit && git push --quiet && npm-auth",
