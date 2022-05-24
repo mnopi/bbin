@@ -221,6 +221,7 @@
 !/bin/npm-login
 !/bin/ppid-path
 !/bin/printarr
+!/bin/sudoers
 ## /etc
 !/etc/bash_completion.d/bats
 !/etc/profile.d/00-constants.sh
