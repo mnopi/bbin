@@ -1,6 +1,6 @@
 {
   "name": "bbin",
-  "version": "1.0.53",
+  "version": "1.0.54",
   "description": "bbin global installs",
   "license": "MIT OR Apache-2.0",
   "files": [
@@ -13,7 +13,7 @@
     "npmjs": "npm publish --quiet && npm run --quiet global",
     "uninstall": "npm -g uninstall --quiet $(npm show bbin packages) bbin"
   },
-  "packages": "cloudflare-cli dotenv nx semver shaurl spoof start-server-and-test tap vercel wrangler",
+  "packages": "cloudflare-cli degit dotenv nx semver serverless shaurl spoof start-server-and-test tap vercel wrangler",
   "workspaces": [
     "workers/*"
   ]
