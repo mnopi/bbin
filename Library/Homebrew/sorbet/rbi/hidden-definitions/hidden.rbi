@@ -2572,7 +2572,9 @@ module Homebrew::EnvConfig
 
   def self.temp(); end
 
-  def self.update_report_only_installed?(); end
+  def self.update_report_all_formulae?(); end
+
+  def self.update_report_version_changed_formulae?(); end
 
   def self.update_to_tag?(); end
 
@@ -4614,6 +4616,18 @@ class RuboCop::Cop::FormulaCop
   def required_dependency?(param0); end
 
   def required_dependency_name?(param0, param1); end
+end
+
+class RuboCop::Cop::Performance::DeletePrefix
+  extend ::RuboCop::Cop::TargetRubyVersion
+end
+
+class RuboCop::Cop::Performance::DeleteSuffix
+  extend ::RuboCop::Cop::TargetRubyVersion
+end
+
+class RuboCop::Cop::Performance::RedundantEqualityComparisonBlock
+  extend ::RuboCop::Cop::TargetRubyVersion
 end
 
 class RuboCop::Cop::RSpec::ChangeByZero
