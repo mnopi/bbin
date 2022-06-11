@@ -211,8 +211,6 @@
 ## /
 !/.bundle
 !/.idea
-## /Bbin.app
-!/Bbin.app
 ## /bin
 !/bin/bbin
 !/bin/filefuncs
@@ -223,17 +221,11 @@
 !/bin/printarr
 !/bin/sudoers
 ## /etc
-!/etc/bash_completion.d/bats
 !/etc/profile.d/00-constants.sh
 !/etc/profile.sh
-## /libexec
-!/libexec
 ## /share
 !/share/bashpro
-## /sbin
-!/sbin/bats
-## /tests
-!/tests
+
 ## /workers
 !/workers
 ## /
@@ -241,7 +233,6 @@
 !/console
 !/Gemfile
 !/lerna.json
-!/Makefile
 !/package.json
 !/package-lock.json
 !/wrangler.toml

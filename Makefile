@@ -22,6 +22,3 @@ worker-bbin-tests:
 
 tests-npm:
 	@npm run test
-
-tests-bats:
-	@bats
